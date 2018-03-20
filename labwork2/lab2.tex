@@ -1,0 +1,60 @@
+\documentclass{article}
+\usepackage{graphicx} % Required to insert images
+\usepackage{listings} % Required for insertion of code
+
+\begin{document}
+
+
+\newpage
+
+On my machine
+\begin{lstlisting}[language=Bash]
+
+caoquan:labwork2 caoquan$ gcc 02.practical.work.gethostbyname.c
+caoquan:labwork2 caoquan$ ./a.out
+Hostname please:
+usth.edu.vn
+address: 104.27.160.15
+caoquan:labwork2 caoquan$ ./a.out
+Hostname please:
+google.com
+address: 172.217.24.206
+caoquan:labwork2 caoquan$ ./a.out
+Hostname please:
+facebook.com
+address: 31.13.78.35
+caoquan:labwork2 caoquan$ ./a.out
+Hostname please:
+vnexpress.net
+address: 111.65.248.132
+\end{lstlisting}
+
+
+On my VPS
+\begin{lstlisting}[language=Bash]
+[ec2-user@ip-172-31-14-228 ~]$ gcc labwork.c 
+[ec2-user@ip-172-31-14-228 ~]$ ./a.out 
+Hostname please:
+usth.edu.vn
+address: 104.27.161.15
+[ec2-user@ip-172-31-14-228 ~]$ ./a.out 
+Hostname please:
+google.com
+address: 172.217.194.101
+[ec2-user@ip-172-31-14-228 ~]$ ./a.out 
+Hostname please:
+facebook.com
+address: 31.13.78.35
+[ec2-user@ip-172-31-14-228 ~]$ ./a.out 
+Hostname please:
+vnexpress.net
+address: 111.65.248.132
+\end{lstlisting}
+
+The IP Addresses are the same.
+Because each server has their own public static IP address.
+The IP address is the same when resolved from every DNS server.
+
+%----------------------------------------------------------------------------------------
+
+\end{document}
