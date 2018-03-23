@@ -32,7 +32,12 @@ int main()
         printf("Cannot connect\n");
     }
 
+    printf("Client: ");
+    scanf("%s", buffer);
+
+    write(sockfd, buffer, sizeof(buffer));
+
     read(sockfd, buffer, sizeof(buffer));
 
-    printf("Buffer: %s\n", buffer);
+    printf("Server: %s\n", buffer);
 }

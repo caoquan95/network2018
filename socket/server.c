@@ -8,7 +8,7 @@
 int main()
 {
     int serverSocket;
-    char buffer[1025] = "hello\n";
+    char buffer[1025];
 
     // create new socket
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -36,11 +36,14 @@ int main()
     {
         printf("Waiting for connection\n");
         int connection = accept(serverSocket, (struct sockaddr *)NULL, NULL);
-        send(connection, buffer, strlen(buffer), 0);
+        read(connection, buffer, sizeof(buffer));
+        printf("Client: %s", buffer);
 
-        // read(serverSocket, buffer, strlen(buffer));
+        printf("Server: \n");
+        scanf("%s", buffer);
 
-        printf("Sended\n");
+        write(connection, buffer, sizeof(buffer));
+
         close(connection);
         sleep(1);
     }
