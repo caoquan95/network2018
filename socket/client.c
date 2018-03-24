@@ -46,6 +46,7 @@ int main()
         }
 
         printf("Client: ");
+
         scanf("%s", buffer);
         write(sockfd, buffer, sizeof(buffer));
     }
