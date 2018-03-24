@@ -6,11 +6,14 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <poll.h>
+#include <sys/select.h>
 
 int main()
 {
     int sockfd;
     char buffer[1025];
+    int clientfds[100];
+    memset(clientfds, 0, sizeof(clientfds));
 
     // create new socket
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -42,23 +45,69 @@ int main()
 
     while (1)
     {
-        int clientfd = accept(sockfd, (struct sockaddr *)NULL, NULL);
-        if (clientfd > 0)
+        fd_set set;
+        FD_ZERO(&set);
+        FD_SET(sockfd, &set);
+        int maxfd = sockfd;
+
+        for (int i = 0; i < 100; i++)
         {
+            if (clientfds[i] > 0)
+            {
+                // printf("adding %d into set\n", clientfds[i]);
+                FD_SET(clientfds[i], &set);
+            }
+            if (clientfds[i] > maxfd)
+                maxfd = clientfds[i];
+        }
+
+        select(maxfd + 1, &set, NULL, NULL, NULL);
+
+        if (FD_ISSET(sockfd, &set))
+        {
+            int clientfd = accept(sockfd, (struct sockaddr *)NULL, NULL);
+
+            // make it non blocking
             int fl = fcntl(clientfd, F_GETFL, 0);
             fl |= O_NONBLOCK;
             fcntl(clientfd, F_SETFL, fl);
-            while (1)
+
+            // add it to the clientfds array
+            for (int i = 0; i < 100; i++)
             {
-                if (read(clientfd, buffer, sizeof(buffer)) > 0)
-                    printf("Client: %s\n", buffer);
-
-                printf("Server: ");
-                scanf("%s", buffer);
-                write(clientfd, buffer, sizeof(buffer));
+                if (clientfds[i] == 0)
+                {
+                    clientfds[i] = clientfd;
+                    break;
+                }
             }
-
-            close(clientfd);
         }
+        for (int i = 0; i < 100; i++)
+        {
+            if (clientfds[i] > 0 && FD_ISSET(clientfds[i], &set))
+            {
+                if (read(clientfds[i], buffer, sizeof(buffer)) > 0)
+                {
+                    printf("client %d says: %s\nserver>", clientfds[i], buffer);
+                }
+                else
+                {
+                    printf("client %d has disconnected.\n", clientfds[i]);
+                    clientfds[i] = 0;
+                }
+            }
+        }
+
+        // while (1)
+        // {
+        //     if (read(clientfd, buffer, sizeof(buffer)) > 0)
+        //         printf("Client: %s\n", buffer);
+
+        //     printf("Server: ");
+        //     scanf("%s", buffer);
+        //     write(clientfd, buffer, sizeof(buffer));
+        // }
+
+        // close(clientfd);
     }
 }
