@@ -7,12 +7,32 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <sys/select.h>
+#include <pthread.h>
+
+int clientfds[100];
+char buffer[1025];
+
+void *writeToClient()
+{
+    while (1)
+    {
+        for (int i = 0; i < 100; i++)
+        {
+            if (clientfds[i] > 0)
+            {
+                // printf("Send to %d: \n", clientfds[i]);
+                fgets(buffer, sizeof(buffer), stdin);
+                write(clientfds[i], buffer, sizeof(buffer));
+            }
+        }
+    }
+    return NULL;
+}
 
 int main()
 {
     int sockfd;
-    char buffer[1025];
-    int clientfds[100];
+
     memset(clientfds, 0, sizeof(clientfds));
 
     // create new socket
@@ -40,6 +60,10 @@ int main()
         perror("bind socket failed");
         exit(0);
     }
+
+    pthread_t tid;
+
+    pthread_create(&tid, NULL, writeToClient, NULL);
 
     listen(sockfd, 10);
 
@@ -88,7 +112,7 @@ int main()
             {
                 if (read(clientfds[i], buffer, sizeof(buffer)) > 0)
                 {
-                    printf("client %d says: %s\nserver>", clientfds[i], buffer);
+                    printf("%s", buffer);
                 }
                 else
                 {
@@ -97,17 +121,5 @@ int main()
                 }
             }
         }
-
-        // while (1)
-        // {
-        //     if (read(clientfd, buffer, sizeof(buffer)) > 0)
-        //         printf("Client: %s\n", buffer);
-
-        //     printf("Server: ");
-        //     scanf("%s", buffer);
-        //     write(clientfd, buffer, sizeof(buffer));
-        // }
-
-        // close(clientfd);
     }
 }

@@ -7,13 +7,31 @@
 #include <netdb.h>
 #include <fcntl.h>
 #include <poll.h>
+#include <pthread.h>
+
+int sockfd;
+char buffer[1025];
+
+void *writeToServer()
+{
+    while (1)
+    {
+
+        if (sockfd > 0)
+        {
+            // printf("Send to server: \n");
+            fgets(buffer, sizeof(buffer), stdin);
+            write(sockfd, buffer, sizeof(buffer));
+        }
+    }
+    return NULL;
+}
 
 int main()
 {
-    int sockfd;
+
     struct hostent *h;
     struct sockaddr_in saddr;
-    char buffer[1025];
 
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -38,16 +56,14 @@ int main()
 
     connect(sockfd, (struct sockaddr *)&saddr, sizeof(saddr));
 
+    pthread_t tid;
+    pthread_create(&tid, NULL, writeToServer, NULL);
+
     while (1)
     {
         if (read(sockfd, buffer, sizeof(buffer)) > 0)
         {
-            printf("Server: %s\n", buffer);
+            printf("%s", buffer);
         }
-
-        printf("Client: ");
-
-        scanf("%s", buffer);
-        write(sockfd, buffer, sizeof(buffer));
     }
 }
